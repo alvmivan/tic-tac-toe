@@ -1,76 +1,136 @@
 import React from 'react';
-import PengineClient from './PengineClient';
 import Board from './Board';
+import {StatusTracker} from "./StatusTracker";
 
 class Game extends React.Component {
 
-  pengine;
+    statusTracker;
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      squares: Array(9).fill('-'),
-      xIsNext: true,
-      status: '?',  // values: 'X' (X is the winner), 'O' (O is the winner), 'T' (tie), '?' (game in progress)
-      waiting: false
-    };
-    this.pengine = new PengineClient();
-    this.handleClick = this.handleClick.bind(this);
-  }
+    constructor(props) {
+        super(props);
+        this.statusTracker = new StatusTracker();
 
-  handleClick(i) {
-    // No action on click if game has ended or we are waiting for game status.
-    if (this.state.status !== '?' || this.state.waiting) {
-      return;
+        this.state = {
+            squares: Array(9).fill(null),
+            turnX: true,
+            status: "?",
+            winning: [] // the winning combination
+        }
+
+
     }
-    // Build Prolog query to make a move and get the updated game status.
-    // Calls to PengineClient.stringify() are to explicitly quote terms for player and board cells ('X', 'Y' and '-')
-    // The query will be like: put('X',0,['-','-','-','-','-','-','-','-','-'],BoardRes),gameStatus(BoardRes, Status) 
-    const squaresS = PengineClient.stringify(this.state.squares);
-    const queryS = 'put(' + PengineClient.stringify(this.state.xIsNext ? 'X' : 'O') + ',' + i + ',' + squaresS + ',BoardRes),'
-      + 'gameStatus(BoardRes, Status)';
-    this.setState({
-      waiting: true
-    });
-    this.pengine.query(queryS, (success, response) => {
-      if (success) {
-        this.setState({
-          squares: response['BoardRes'],
-          xIsNext: !this.state.xIsNext,
-          status: response['Status'],
-          waiting: false
-        });
-      } else {
-        // Prolog query will fail when the user clicked on a non empty cell.
-        this.setState({
-          waiting: false
-        });
-      }
-    });
-  }
 
-  render() {
-    const status = this.state.status;
-    let statusText;
-    if (status === '?') {
-      statusText = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-    } else if (status === 'T') {
-      statusText = 'Tie!'
-    } else {
-      statusText = 'Winner: ' + status;
+    gameStatus(squares) {
+        const winningLines = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+
+            [0, 4, 8],
+            [2, 4, 6],
+
+        ]
+
+        for (let i = 0; i < winningLines.length; ++i) {
+            const [a, b, c] = winningLines[i];
+
+            // 3 same no null tokens in lines
+            if (squares[a] !== null && squares[a] === squares[b] && squares[b] === squares[c]) {
+                let state = {...this.state}
+                state.winning = [a, b, c]
+                this.setState(state)
+                return squares[a];
+            }
+
+            if (squares.every(sq => sq !== null)) // full of no null tokens
+            {
+                return "T";//tie
+            }
+        }
+        return "?"//game in progress
     }
-    return (
-      <div className="game">
-        <Board
-          squares={this.state.squares}
-          onClick={i => this.handleClick(i)}
-        />
-        <div className="gameInfo">
-          {statusText}
-        </div>
-      </div>
-    );
-  }
+
+    handleClick(i) {
+        if (this.state.status !== "?" || this.state.squares[i] !== null) {
+            return;
+        }
+
+        const squares = this.state.squares.slice();//copy array
+        squares[i] = this.getTokenByTurn()
+        const status = this.gameStatus(squares);
+
+        let newState = {
+            squares,
+            status,
+            turnX: !this.state.turnX,
+        };
+
+        this.statusTracker.statusChange(this.state.squares, newState.squares, this.state.turnX ? "X":"O")
+
+        this.setState(newState);
+
+
+
+    }
+
+
+    getTokenByTurn() {
+        return this.state.turnX ? "X" : "O";
+    }
+
+    render() {
+
+        const status = this.state.status;
+        let statusText;
+
+        if (status === "?") {
+            statusText = this.getTokenByTurn()
+        } else if (status === "T") {
+            statusText = "It's a Tie!"
+        } else {
+            statusText = "Winner " + status;
+        }
+
+        return (
+            <div className="game">
+
+                <div className="gameTittle">
+                    {"Tic Tac Toe"}
+                </div>
+                <div/>
+                <div className="gameInfo">
+                    {statusText}
+                </div>
+                <div/>
+                <Board
+                    ends={this.state.status !== "?"}
+                    squares={this.state.squares}
+                    onClick={i => this.handleClick(i)}
+                    winning={this.state.winning}
+                />
+
+                <button
+                    className={this.state.status === "?" ? "playAgain" : "playAgainBig"}
+                    onClick={() => this.setState({
+                        squares: Array(9).fill(null),
+                        turnX: this.state.winning.length === 0 ? !this.state.turnX : this.state.turnX,
+                        // on tie flip turns (cause 9 is odd)
+                        // on empty board flip turns
+                        // if anyone win, begins the other (keeping turn cause is already flipped)
+                        status: "?",
+                        winning: []
+                    })}>
+                    {"Reset"}
+                </button>
+
+            </div>
+        );
+    }
 }
+
 
 export default Game;
