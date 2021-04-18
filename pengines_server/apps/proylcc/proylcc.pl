@@ -9,16 +9,20 @@
 
 %used like a constant
 
-scisorsOptions([
-	[1,2],
-	[1,0],
-	[3,0],
-	[3,6],
-	[5,2],
-	[5,8],
-	[7,6],
-	[7,8],
+%for scissor options
+scissorsOptions([
+	[1,2,8],
+	[1,0,6],
+	[3,0,2],
+	[3,6,8],
+	[5,2,0],
+	[5,8,6],
+	[7,6,0],
+	[7,8,2]
 ]).
+
+
+
 
 indices([0,1,2,3,4,5,6,7,8]).
 
@@ -110,10 +114,15 @@ gameStatus(Board, "?"):-
 
 gameStatus(_Board, "T").
 
+getAIMovement(Board, Team, BoardOut, "easy"):-
+	justMoveAnywhere(Board, Team, BoardOut).
+
+getAIMovement(Board, Team, BoardOut, "hard"):-
+	aiMovement(BoardOut, Team, BoardOut).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% aiMovement(+Board, -BoardOut)
+% aiMovement(+Board, +Team, -BoardOut)
 %
 aiMovement(Board, Team, BoardOut):-
 	caseOneForWin(Board, Team, BoardOut).
@@ -127,9 +136,14 @@ aiMovement(Board, Team, BoardOut):-
 aiMovement(Board, Team, BoardOut):-
     caseSecondMovement(Board,Team,BoardOut).
 
-    
+aiMovement(Board, Team, BoardOut):-
+	caseMakeFirstScissor(Board, Team, BoardOut).
 
+aiMovement(Board, Team, BoardOut):-
+	caseMakeSecondScissor(Board, Team, BoardOut).
 
+aiMovement(Board, Team, BoardOut):-
+	caseMoveAnywhereIfNotBetterMovement(Board, Team, BoardOut).
 
 
 caseOneForWin(Board, Team, BoardOut):-
@@ -167,23 +181,65 @@ caseSecondMovement(Board, Team, BoardOut):-
 	getAtIndex(Board,4,"-"),
 	setAtIndex(Board, 4, Team, BoardOut).
 
+caseMoveAnywhereIfNotBetterMovement(Board, Team, BoardOut):-
+	%ensure there is not better strategies
+	not(caseOneForWin(Board, Team, BoardOut)),
+	not(caseAvoidLose(Board, Team, BoardOut)),
+	not(caseFirstMovement(Board,Team,BoardOut)),
+	not(caseSecondMovement(Board,Team,BoardOut)),
+	not(caseMakeFirstScissor(Board, Team, BoardOut)),
+	not(caseMakeSecondScissor(Board, Team, BoardOut)),
+	%look for an empty space and move
+	justMoveAnywhere(Board, Team, BoardOut).
 
-
-caseMakeFirstScissor(Board, Team, BoardOut):-
-	count(Board,7,"-"), %ai has the third movement 
-	getAtIndex(Board, 4, Team),
-	flip(Team, EnemyTeam),
-	member(EnemyIndex, [1,3,5,7]),
-	getAtIndex(Board, EnemyIndex, EnemyTeam).
-	scisorsOptions(Options),
-	member([EnemyIndex,Index], Options),
+justMoveAnywhere(Board, Team, BoardOut):-
+	indices(Indices),
+	member(Index, Indices),
+	getAtIndex(Board, Index, "-"),
 	setAtIndex(Board, Index, Team, BoardOut).
 
 
-     
+caseMakeFirstScissor(Board, Team, BoardOut):-
+	% ai has the third movement 
+	count(Board,"-",7),
+	% ai at center
+	getAtIndex(Board, 4, Team),
+	% get enemy token
+	flip(Team, EnemyTeam),
+	% get a "bad" movement for enemy
+	member(EnemyIndex, [1,3,5,7]),
+	% retrieve scissor strategy configuration
+	scissorsOptions(Options),
+	% check for possibles movements for ai
+	member([EnemyIndex,Index,_], Options),
+	% validate enemy "bad" movement
+	getAtIndex(Board, EnemyIndex, EnemyTeam),
+	% make ai movement
+	setAtIndex(Board, Index, Team, BoardOut).
 
 
-
+caseMakeSecondScissor(Board, Team, BoardOut):-
+	%ensure there is not better strategies
+	not(caseOneForWin(Board, Team, BoardOut)),
+	not(caseAvoidLose(Board, Team, BoardOut)),	
+	% ai has the 5th movement
+	count(Board,"-",5), 
+	% ai at center
+	getAtIndex(Board, 4, Team),
+	% retrieve enemy token
+	flip(Team, EnemyTeam),
+	% get a "bad" movement for enemy
+	member(EnemyIndex, [1,3,5,7]),	
+	% retrieve scissor strategy configuration
+	scissorsOptions(Options),
+	% retrieve now the last movement for the scissor
+	member([EnemyIndex,FirstMovementIndex, SecondMovementIndex], Options),
+	% validate enemy bad move
+	getAtIndex(Board, EnemyIndex, EnemyTeam),	
+	% validate ai first scissor 
+	getAtIndex(Board, FirstMovementIndex, Team),
+	% make ai move
+	setAtIndex(Board, SecondMovementIndex, Team, BoardOut).
 
 
 oneForWin(Board, Team, Index):-
