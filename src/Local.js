@@ -12,7 +12,7 @@ const en = {
     "reset": "Reset",
 }
 
-const currentLanguage = navigator.language.slice(0, 2) !== "es" ? es : en;
+const currentLanguage = navigator.language.slice(0, 2) !== "es" ? en : es;
 
 
 export function getText(key, params = []) {
