@@ -1,18 +1,18 @@
 const es = {
-    "tie-tittle": "¡Es un empate!",
-    "winner-is": "El ganador es {0}",
-    "game-tittle": "Ta Te Ti",
+    "tie": "¡Es un empate!",
+    "winner": "El ganador es {0}",
+    "tittle": "Ta Te Ti",
     "reset": "Nuevo Juego",
 }
 
 const en = {
-    "tie-tittle": "It's a Tie!",
-    "winner-is": "The winner is {0}!",
-    "game-tittle": "Tic Tac Toe",
+    "tie": "It's a Tie!",
+    "winner": "The winner is {0}!",
+    "tittle": "Tic Tac Toe",
     "reset": "Reset",
 }
 
-const currentLanguage = navigator.language.slice(0, 2) === "es" ? es : en;
+const currentLanguage = navigator.language.slice(0, 2) !== "es" ? es : en;
 
 
 export function getText(key, params = []) {
@@ -21,7 +21,9 @@ export function getText(key, params = []) {
         params = []
     }
 
-    let value = currentLanguage[key];
+    params = [params].flat();
+
+    let value = currentLanguage[key] ?? key;
 
     for (let i = 0; i < params.length; i++) {
         let param = params[i];

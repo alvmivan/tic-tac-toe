@@ -111,7 +111,7 @@ body {
     -ms-transition: 0.5s;
     -o-transition: 0.5s;
     transition: 0.5s;
-    font-size: 100%;
+    font-size: 200%;
     width: 100px;
     height: 50px;
 }
@@ -119,13 +119,12 @@ body {
 .playAgainBig {
     position: relative;
     align-self: center;
-    font-size: xx-large;
+    font-size: 200%;
     width: 200px;
     height: 75px;
     color: cornflowerblue;
     background-color: black;
     margin: 10px;
-
 
     -webkit-transition: 1s;
     -moz-transition: 1s;

@@ -1,13 +1,17 @@
 import React from 'react';
+import {emptyToken} from "./Game";
+
+const ClassForX = "x";
+const ClassForO = "o";
 
 class Square extends React.Component {
 
     render() {
 
-        let squareClass = "x";
+        let squareClass = ClassForX;
 
         if (this.props.value === "O") {
-            squareClass = "o";
+            squareClass = ClassForO;
         }
 
         if(this.props.winning)
@@ -24,7 +28,7 @@ class Square extends React.Component {
 
             <button className="square" onClick={this.props.onClick}>
                 <div className={squareClass}>
-                    {this.props.value}
+                    {this.props.value === emptyToken ? "" : this.props.value}
                 </div>
             </button>
 
