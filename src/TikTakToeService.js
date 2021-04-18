@@ -18,26 +18,54 @@ export class TikTakToeService {
         }
     }
 
-    setPlayerMovement(aiPiece, previousState, playerMovement, onComplete, onError) {
+    setAIMovement(aiTeam, previousState, difficulty,onComplete, onError) {
 
         this.replaceOldElements(previousState, [null, undefined, ""], "-");
 
         const squaresS = PengineClient.stringify(previousState);
-        const aiToken = PengineClient.stringify(aiPiece);
+        const aiToken = PengineClient.stringify(aiTeam);
+
 
         console.log("prev state : " + squaresS + " ai token : " + aiToken)
 
-        const queryS = `put(${aiToken},${playerMovement},${squaresS},BoardRes),gameStatus(BoardRes, Status)`;
+        //getAIMovement(Board, Team, BoardOut, Difficulty)
+        const queryS = `getAIMovement(${squaresS},${aiToken},BoardRes,"${difficulty}"), gameStatus(BoardRes, Status)`;
+
+        console.log(queryS)
 
         this.pengine.query(queryS, (success, response) => {
 
-            console.log("response : " + response)
+            console.log("response : " + JSON.stringify(response))
             if (success) {
                 let boardRes = response['BoardRes'];
                 let gameStatus = response['Status'];
                 onComplete(boardRes, gameStatus)
             } else {
                 onError();
+            }
+        });
+    }
+
+    setPlayerMovement(team, previousState, movement, onComplete, onError) {
+
+        this.replaceOldElements(previousState, [null, undefined, ""], "-");
+
+        const squaresS = PengineClient.stringify(previousState);
+        const teamToken = PengineClient.stringify(team);
+
+        console.log("prev state : " + squaresS + " ai token : " + teamToken)
+
+        const queryS = `put(${teamToken},${movement},${squaresS},BoardRes),gameStatus(BoardRes, Status)`;
+
+        this.pengine.query(queryS, (success, response) => {
+
+            console.log("response : " + JSON.stringify(response))
+            if (success) {
+                let boardRes = response['BoardRes'];
+                let gameStatus = response['Status'];
+                onComplete(boardRes, gameStatus)
+            } else {
+                onError(response);
             }
         });
     }

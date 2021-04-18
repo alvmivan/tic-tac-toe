@@ -1,7 +1,8 @@
 :- module(proylcc,
 	[  
 		put/4,
-		gameStatus/2
+		gameStatus/2,
+		getAIMovement/4
 	]).
 
 :-use_module(library(lists)).
@@ -117,8 +118,30 @@ gameStatus(_Board, "T").
 getAIMovement(Board, Team, BoardOut, "easy"):-
 	justMoveAnywhere(Board, Team, BoardOut).
 
+getAIMovement(Board, Team, BoardOut, "mid"):-
+	midAi(Board, Team, BoardOut).
+
 getAIMovement(Board, Team, BoardOut, "hard"):-
-	aiMovement(BoardOut, Team, BoardOut).
+	aiMovement(Board, Team, BoardOut).
+
+
+% mid ai
+
+midAi(Board,Team,BoardOut):-
+	caseOneForWin(Board, Team, BoardOut).
+
+midAi(Board,Team,BoardOut):-
+	caseAvoidLose(Board, Team, BoardOut).
+
+midAi(Board,Team,BoardOut):-
+	not(caseOneForWin(Board, Team, BoardOut)),
+	not(caseAvoidLose(Board, Team, BoardOut)),	
+	justMoveAnywhere(Board, Team, BoardOut).
+
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -141,6 +164,9 @@ aiMovement(Board, Team, BoardOut):-
 
 aiMovement(Board, Team, BoardOut):-
 	caseMakeSecondScissor(Board, Team, BoardOut).
+
+aiMovement(Board, Team, BoardOut):-
+	tryPickACorner(Board, Team, BoardOut).
 
 aiMovement(Board, Team, BoardOut):-
 	caseMoveAnywhereIfNotBetterMovement(Board, Team, BoardOut).
@@ -181,6 +207,19 @@ caseSecondMovement(Board, Team, BoardOut):-
 	getAtIndex(Board,4,"-"),
 	setAtIndex(Board, 4, Team, BoardOut).
 
+tryPickACorner(Board, Team, BoardOut):-
+	%ensure there is not better strategies
+	not(caseOneForWin(Board, Team, BoardOut)),
+	not(caseAvoidLose(Board, Team, BoardOut)),
+	not(caseFirstMovement(Board,Team,BoardOut)),
+	not(caseSecondMovement(Board,Team,BoardOut)),
+	not(caseMakeFirstScissor(Board, Team, BoardOut)),
+	not(caseMakeSecondScissor(Board, Team, BoardOut)),
+	%get a corner
+	member(Index, [0,2,6,8]),
+	getAtIndex(Board, Index, "-"),
+	setAtIndex(Board, Index, Team, BoardOut).
+
 caseMoveAnywhereIfNotBetterMovement(Board, Team, BoardOut):-
 	%ensure there is not better strategies
 	not(caseOneForWin(Board, Team, BoardOut)),
@@ -189,6 +228,7 @@ caseMoveAnywhereIfNotBetterMovement(Board, Team, BoardOut):-
 	not(caseSecondMovement(Board,Team,BoardOut)),
 	not(caseMakeFirstScissor(Board, Team, BoardOut)),
 	not(caseMakeSecondScissor(Board, Team, BoardOut)),
+	not(tryPickACorner(Board, Team, BoardOut)),	
 	%look for an empty space and move
 	justMoveAnywhere(Board, Team, BoardOut).
 

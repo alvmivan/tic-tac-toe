@@ -1,5 +1,5 @@
 import React from 'react';
-import {emptyToken} from "./Game";
+import {emptyToken} from "./GameLoop";
 
 const ClassForX = "x";
 const ClassForO = "o";
