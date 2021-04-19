@@ -13,7 +13,7 @@ export let debug = false
 
 export const gameState = {
     onChange: undefined,
-    difficulty: "mid",
+    difficulty: "easy",
     isPvp: false,
     playerIsX: true,
     turnX: true,
@@ -23,7 +23,7 @@ export const gameState = {
 }
 
 export function print(msj) {
-    if(!debug) return;
+    if (!debug) return;
     console.log(msj);
     msj = msj + ""
     gameState.lastLog = gameState.lastLog ? gameState.lastLog + "\n\n" + msj : msj
@@ -44,21 +44,22 @@ function canMoveUser() {
 function moveAI() {
     gameState.blockInput = true;
     print("move ai block")
-    setTimeout(() => {
-        service.setAIMovement(gameState.playerIsX ? oToken : xToken, gameState.squares, gameState.difficulty,
-            (boardRes, gameStatus) => {
-                gameState.turnX = !gameState.turnX;
-                gameState.status = gameStatus;
-                gameState.squares = boardRes;
-                gameState.blockInput = false;
-                print("move ai unlock")
-                change();
-            },
-            () => {
-                gameState.blockInput = false;
-                change();
-            });
-    }, 1500);
+
+
+    service.setAIMovement(gameState.playerIsX ? oToken : xToken, gameState.squares, gameState.difficulty,
+        (boardRes, gameStatus) => {
+            gameState.turnX = !gameState.turnX;
+            gameState.status = gameStatus;
+            gameState.squares = boardRes;
+            gameState.blockInput = false;
+            print("move ai unlock")
+            change();
+        },
+        () => {
+            gameState.blockInput = false;
+            change();
+        });
+
 
 }
 
@@ -90,11 +91,31 @@ export function onPlayerClicks(movementIndex) {
     );
 }
 
+function count(array, element) {
+    let counter = 0;
+    for (const el of array) {
+        if (el === element) {
+            counter++;
+        }
+    }
+    return counter;
+}
+
 export function resetGame(winning) {
 
     let turnX = winning.length === 0 ? !gameState.turnX : gameState.turnX;
 
     let willMoveAI = turnX !== gameState.playerIsX && !gameState.isPvp;
+
+
+    //hay un caso en que la AI mueve rápido y no te deja rotar con Reset quien arranca
+    if (willMoveAI
+        && count(gameState.squares, gameState.playerIsX ? oToken : xToken) === 0
+        && count(gameState.squares, emptyToken) === 8) {
+        willMoveAI = false;
+        turnX = gameState.playerIsX;
+    }
+
 
     gameState.squares = Array(9).fill(emptyToken);
     gameState.turnX = turnX;

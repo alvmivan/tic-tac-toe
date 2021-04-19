@@ -11,7 +11,7 @@ import {
     tieStatus,
     xToken
 } from "./GameLoop";
-
+import {SelectDifficulty} from "./SelectDifficulty";
 
 
 const classes = {
@@ -54,13 +54,7 @@ class Game extends React.Component {
         }
         return []
     }
-
-    handleClick(movementIndex) {
-        onPlayerClicks(movementIndex)
-    }
-
-    render() {
-
+    getStatusTextAndWinningArray() {
         let statusText;
         let winning = [];
         switch (gameState.status) {
@@ -75,10 +69,29 @@ class Game extends React.Component {
                 statusText = getText("winner", [gameState.status]);
                 break;
         }
+        return {statusText, winning};
+    }
+
+    handleClick(movementIndex) {
+        onPlayerClicks(movementIndex)
+    }
+
+    handleDifficulty(difficulty) {
+        gameState.difficulty = difficulty;
+        let {_, winning} = this.getStatusTextAndWinningArray();
+        resetGame(winning);
+    }
+
+    render() {
+        let {statusText, winning} = this.getStatusTextAndWinningArray();
 
 
         return (
             <div className={classes.game}>
+                <SelectDifficulty
+                    difficulty={gameState.difficulty}
+                    onSelectDifficulty={(d)=>this.handleDifficulty(d)}
+                />
 
                 <div className={classes.gameTittle}>
                     {getText("tittle")}
@@ -97,19 +110,20 @@ class Game extends React.Component {
 
                 <button
                     className={gameState.status === tieStatus ? classes.playAgain : classes.playAgainBig}
-                    onClick={()=>resetGame(winning)}>
+                    onClick={() => resetGame(winning)}>
                     {getText("reset")}
                 </button>
 
 
                 <div className={classes.gameInfo}>
-                    {debug ? "DEBUG STATE : "+JSON.stringify(gameState, null ,2) : ""}
+                    {debug ? "DEBUG STATE : " + JSON.stringify(gameState, null, 2) : ""}
                 </div>
 
             </div>
         );
 
     }
+
 
 }
 

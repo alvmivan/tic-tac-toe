@@ -3,6 +3,9 @@ const es = {
     "winner": "El ganador es {0}",
     "tittle": "Ta Te Ti",
     "reset": "Nuevo Juego",
+    "easy" : "Fácil",
+    "mid" : "Intermedio",
+    "hard" : "Difícil",
 }
 
 const en = {
@@ -10,6 +13,9 @@ const en = {
     "winner": "The winner is {0}!",
     "tittle": "Tic Tac Toe",
     "reset": "Reset",
+    "easy" : "Easy",
+    "mid" : "Medium",
+    "hard" : "Hard",
 }
 
 const currentLanguage = navigator.language.slice(0, 2) !== "es" ? en : es;

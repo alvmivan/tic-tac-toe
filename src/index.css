@@ -141,3 +141,60 @@ body {
 .playAgainBig:focus {
     outline: none;
 }
+
+
+
+.difficultyItemSelected:active{
+    outline: none;
+}
+.difficultyItem:active{
+    outline: none;
+}
+.difficultyItem:hover {
+    outline: none;
+}
+
+.difficultyItemSelected:hover {
+    outline: none;
+}
+
+
+.difficultyPanel {
+    
+    width: 300px;
+    display: flex;
+    justify-content: space-evenly;
+    align-self: center;
+}
+
+.difficultyItem {
+    color: #cacaca;
+    margin: 10px;
+    outline: none;
+
+    background: #0000;
+    -webkit-transition: 1s;
+    -moz-transition: 1s;
+    -ms-transition: 1s;
+    -o-transition: 1s;
+    transition: 1s;
+
+    border: solid #0000 2px;
+}
+
+.difficultyItemSelected{
+    color: #cacaca;
+    margin: 10px;
+    outline: none;
+
+    background:#0000;
+    -webkit-transition: 1s;
+    -moz-transition: 1s;
+    -ms-transition: 1s;
+    -o-transition: 1s;
+    transition: 1s;
+
+    border: solid #fff 2px;
+}
+
+
