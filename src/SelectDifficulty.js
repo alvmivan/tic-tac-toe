@@ -6,7 +6,6 @@ const difficultySelectedClass = "difficultyItemSelected";
 
 export class SelectDifficulty extends React.Component {
 
-
     render() {
 
         const easyDifficultyClass = this.props.difficulty === "easy" ? difficultySelectedClass :  difficultyItemClass;
