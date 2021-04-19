@@ -1,6 +1,5 @@
-import ReactDOM from 'react-dom';
 import {getText} from "./Local";
-import React, { useRef, useLayoutEffect, useState } from "react";
+import React from "react";
 
 const difficultyItemClass = "difficultyItem";
 const difficultySelectedClass = "difficultyItemSelected";
